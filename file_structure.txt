@@ -1,0 +1,20 @@
+wildtrek-jungle-theme/
+├── style.css
+├── functions.php
+├── index.php
+├── header.php
+├── footer.php
+├── front-page.php (Home)
+├── page-about.php (About)
+├── page-contact.php (Contact)
+├── archive-resort.php
+├── single-resort.php
+├── archive-package.php
+├── single-package.php
+├── archive-jungle.php
+├── single-jungle.php
+└── assets/
+    ├── css/
+    │   └── theme-style.css
+    └── js/
+        └── theme-script.js
