@@ -1226,3 +1226,487 @@ h1, h2, h3, h4, h5, h6 {
         padding: 25px;
     }
 }
+
+/* =========================================
+   1. GLOBAL VARIABLES & TYPOGRAPHY
+   ========================================= */
+:root {
+    /* COLORS */
+    --primary: #e67e22;       /* The Tadoba Orange */
+    --primary-hover: #d35400;
+    --heading-green: #2b4538; /* Dark Dull Green (Forest Theme) */
+    --text-dark: #1a3332;     /* Very dark green-grey for body text */
+    --text-light: #6b7c7a;    /* Muted grey-green for descriptions */
+    
+    /* BACKGROUNDS */
+    --light-bg: #fdfaf5;      /* Warm Cream Background */
+    --white: #ffffff;
+    
+    /* UTILS */
+    --border: #ececec;        /* Lighter, subtle border */
+    --radius: 16px;           /* More rounded corners for modern look */
+    --shadow: 0 10px 40px rgba(43, 69, 56, 0.08); /* Soft Forest Shadow */
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: var(--light-bg);
+    color: var(--text-dark);
+    font-family: 'Inclusive Sans', sans-serif;
+    line-height: 1.8; /* Increased spacing for "Free" look */
+    font-size: 17px;  /* Slightly larger readable text */
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Anybody', sans-serif;
+    color: var(--heading-green); /* Dull Green Headings */
+    margin-top: 0;
+    line-height: 1.3;
+}
+
+a { text-decoration: none; transition: var(--transition); }
+img { max-width: 100%; height: auto; }
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* =========================================
+   2. LAYOUT GRID
+   ========================================= */
+.package-view-wrapper { padding-bottom: 100px; }
+
+.package-main-flex {
+    display: flex;
+    gap: 60px; /* Wider gap between content and sidebar */
+    margin-top: 50px;
+}
+
+.package-left { flex: 2; }
+.package-sidebar { flex: 1; min-width: 350px; }
+
+/* Main Title Style */
+.package-main-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: var(--heading-green);
+}
+
+/* =========================================
+   3. HERO COLLAGE
+   ========================================= */
+.package-collage {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    height: 520px; /* Taller for impact */
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.collage-large, .thumb-box {
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--radius);
+    position: relative;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.collage-large:hover, .thumb-box:hover { transform: translateY(-3px); }
+
+.days-label {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    background: var(--white);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 800;
+    color: var(--heading-green);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+.days-label span { color: var(--primary); font-size: 1.3em; margin-right: 5px; }
+
+.collage-thumbs { display: grid; grid-template-rows: 1fr 1fr; gap: 20px; }
+
+.overlay-txt {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(26, 51, 50, 0.85); /* Dark green tint */
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+/* =========================================
+   4. HORIZONTAL ICONS (Top)
+   ========================================= */
+.package-icon-bar.horizontal {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    background: var(--white);
+    padding: 35px; /* More breathing room */
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-bottom: 50px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.package-icon-bar.horizontal .p-icon-box i {
+    font-size: 28px;
+    color: var(--primary); /* CHANGED TO ORANGE */
+    margin-bottom: 12px;
+    display: block;
+    transition: var(--transition);
+}
+
+.package-icon-bar.horizontal:hover .p-icon-box i { transform: scale(1.1); }
+
+.package-icon-bar.horizontal p {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.package-icon-bar.horizontal span {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--heading-green);
+    display: block;
+    margin-top: 5px;
+}
+
+/* =========================================
+   5. SECTIONS (General)
+   ========================================= */
+.details-section { margin-bottom: 70px; /* Big gaps between sections */ }
+
+.h2-title {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee; /* Subtle underline */
+}
+
+/* Text Content */
+.overview-txt, .path-text, .faq-answer {
+    color: var(--text-light);
+    font-size: 1.05rem;
+}
+
+/* Highlights */
+.h3-subtitle {
+    font-size: 1.5rem;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: var(--heading-green);
+}
+
+.highlight-check-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.highlight-check-list li {
+    display: flex;
+    align-items: center;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+.highlight-check-list li i {
+    color: var(--primary);
+    margin-right: 12px;
+    font-size: 1.1rem;
+}
+
+/* =========================================
+   6. ORANGE TIMELINE
+   ========================================= */
+.orange-path-timeline {
+    border-left: 2px dashed #d1d8d5;
+    margin-left: 20px;
+    padding-left: 50px; /* More space from line to text */
+    position: relative;
+}
+
+.path-day { position: relative; margin-bottom: 50px; }
+
+.path-dot {
+    position: absolute;
+    left: -59px; /* Re-aligned for wider padding */
+    top: 0;
+    width: 20px;
+    height: 20px;
+    background: var(--light-bg);
+    border: 3px solid var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px var(--light-bg); /* Clean whitespace around dot */
+}
+
+.path-info h4 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    color: var(--heading-green);
+}
+
+/* =========================================
+   7. COST SECTION
+   ========================================= */
+.cost-split-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.cost-item {
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.cost-item h3 { font-size: 1.3rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.cost-item ul { list-style: none; padding: 0; margin: 0; }
+.cost-item li { margin-bottom: 15px; font-size: 1rem; color: var(--text-light); display: flex; align-items: flex-start; }
+.cost-item li i { margin-top: 6px; margin-right: 12px; flex-shrink: 0; }
+
+/* Colors */
+.cost-item.inc h3 { color: #27ae60; }
+.cost-item.inc li i { color: #27ae60; }
+.cost-item.inc { border-top: 4px solid #27ae60; }
+
+.cost-item.exc h3 { color: #e74c3c; }
+.cost-item.exc li i { color: #e74c3c; }
+.cost-item.exc { border-top: 4px solid #e74c3c; }
+
+/* =========================================
+   8. FAQ ACCORDION
+   ========================================= */
+.faq-accordion { display: flex; flex-direction: column; gap: 15px; }
+
+.faq-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: var(--transition);
+}
+.faq-item:hover { box-shadow: var(--shadow); border-color: transparent; }
+
+.faq-trigger {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 20px 25px; /* Larger click area */
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--heading-green);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-answer {
+    display: none;
+    padding: 0 25px 25px;
+    color: var(--text-light);
+    border-top: 1px solid #f5f5f5;
+}
+
+/* =========================================
+   9. MAP
+   ========================================= */
+.map-container {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 5px solid var(--white);
+    box-shadow: var(--shadow);
+}
+
+/* =========================================
+   10. SIDEBAR (Sticky)
+   ========================================= */
+.sticky-wrapper { position: sticky; top: 30px; }
+
+/* Price Card */
+.sticky-price-card {
+    background: var(--white);
+    padding: 40px; /* Big padding */
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.price-data { margin-bottom: 25px; }
+.old-p { text-decoration: line-through; color: #aaa; font-size: 1rem; display: block; margin-bottom: 5px; }
+.new-p { font-size: 2.5rem; font-weight: 800; color: var(--heading-green); line-height: 1; }
+.new-p span { font-size: 1rem; color: var(--text-light); font-weight: 500; }
+
+.cta-booking-btn {
+    display: block;
+    background: #c5e063;
+    color: #1a3332;
+    padding: 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(197, 224, 99, 0.4);
+    transition: var(--transition);
+}
+.cta-booking-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(197, 224, 99, 0.6);
+}
+
+.cta-help { margin-top: 20px; font-size: 0.9rem; color: var(--text-light); }
+.cta-help a { color: var(--primary); font-weight: 600; }
+
+/* Vertical Icons (Sidebar) */
+.sidebar-icons-vertical {
+    margin-top: 30px;
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.v-icon-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.v-icon-box:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+.v-icon-box i { font-size: 24px; color: var(--primary); width: 30px; text-align: center; }
+.v-icon-box div { display: flex; flex-direction: column; }
+.v-icon-box strong { font-size: 13px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.v-icon-box span { font-weight: 700; color: var(--heading-green); font-size: 1.1rem; }
+
+/* =========================================
+   11. MOBILE RESPONSIVE
+   ========================================= */
+@media (max-width: 900px) {
+    .package-main-flex { flex-direction: column; gap: 40px; }
+    .package-collage { height: auto; grid-template-columns: 1fr; }
+    .collage-large { height: 300px; }
+    .collage-thumbs { display: none; } /* Hide thumbs on mobile for clean look */
+    .package-icon-bar.horizontal { grid-template-columns: 1fr 1fr; }
+    .cost-split-row { grid-template-columns: 1fr; }
+}
+
+/* =========================================
+   11. MOBILE RESPONSIVE (Updated)
+   ========================================= */
+@media (max-width: 900px) {
+    /* Stack sidebar below content */
+    .package-main-flex { flex-direction: column; gap: 40px; }
+    
+    /* Adjust Collage */
+    .package-collage { height: auto; grid-template-columns: 1fr; }
+    .collage-large { height: 300px; }
+    .collage-thumbs { display: none; } 
+
+    /* Adjust Top Icons to 2x2 Grid */
+    .package-icon-bar.horizontal { grid-template-columns: 1fr 1fr; }
+    
+    /* Cost section stacks vertically */
+    .cost-split-row { grid-template-columns: 1fr; }
+
+    /* HIDE DUPLICATE ICONS IN SIDEBAR */
+    .sidebar-icons-vertical { display: none; }
+}
+
+/* =========================================
+   12. FOREST PAGE STYLES
+   ========================================= */
+/* Hero Section */
+.forest-hero {
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    margin-bottom: 40px;
+}
+.hero-content h1 { color: #fff; font-size: 3.5rem; margin-bottom: 10px; }
+.hero-tag { background: var(--primary); color: #fff; padding: 5px 15px; border-radius: 20px; text-transform: uppercase; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+.hero-content p { font-size: 1.2rem; opacity: 0.9; }
+
+/* Layout */
+.forest-layout { display: flex; gap: 50px; }
+.forest-main { flex: 2; }
+.forest-sidebar { flex: 1; }
+
+/* Quick Info Bar */
+.forest-info-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background: var(--white);
+    padding: 25px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+    margin-top: -80px; /* Overlap effect */
+    position: relative;
+    z-index: 10;
+}
+.f-info-box { display: flex; align-items: center; gap: 15px; }
+.f-info-box i { font-size: 28px; color: var(--primary); }
+.f-info-box div { display: flex; flex-direction: column; }
+.f-info-box strong { text-transform: uppercase; font-size: 0.8rem; color: #888; letter-spacing: 1px; }
+.f-info-box span { font-weight: 700; color: var(--heading-green); font-size: 1.1rem; }
+
+/* Zones Grid */
+.zones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.zone-card { background: var(--white); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); }
+.zone-card h3 { font-size: 1.3rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.zone-card.core h3 { color: #e67e22; }
+.zone-card.buffer h3 { color: #27ae60; }
+.zone-card ul { list-style: none; padding: 0; }
+.zone-card li { padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-weight: 500; color: var(--text-dark); }
+.zone-card li:last-child { border-bottom: none; }
+
+/* Timings */
+.timing-box { background: #e8f6f3; padding: 25px; border-radius: var(--radius); display: flex; gap: 20px; align-items: flex-start; color: var(--heading-green); }
+.timing-box i { font-size: 24px; margin-top: 5px; }
+
+/* Sidebar Widget */
+.sidebar-widget { background: var(--white); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); }
+.mini-pkg { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; transition: var(--transition); }
+.mini-pkg:hover { transform: translateX(5px); }
+.mini-img { width: 80px; height: 80px; border-radius: 10px; background-size: cover; }
+.mini-info h4 { font-size: 1rem; margin-bottom: 5px; color: var(--heading-green); }
+.mini-price { color: var(--primary); font-weight: 700; font-size: 0.9rem; }
+.view-all-btn { display: block; text-align: center; background: var(--heading-green); color: #fff; padding: 12px; border-radius: 30px; font-weight: bold; margin-top: 20px; }
+
+@media (max-width: 900px) {
+    .forest-layout { flex-direction: column; }
+    .forest-info-bar { grid-template-columns: 1fr; margin-top: 0; }
+    .zones-grid { grid-template-columns: 1fr; }
+}
