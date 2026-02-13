@@ -2692,3 +2692,104 @@ header {
     .why-grid { grid-template-columns: 1fr; }
     .about-main-title { font-size: 3rem; }
 }
+
+/* --- HERO SECTION --- */
+.page-hero {
+    position: relative;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+}
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5); /* Darken image */
+}
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    font-weight: 800;
+}
+
+/* --- CONTACT GRID --- */
+.contact-section {
+    padding: 80px 0;
+    background: #f9f9f9;
+}
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Info takes less space than Form */
+    gap: 50px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* LEFT COLUMN */
+.contact-info {
+    background: #2c3e50; /* Dark Theme */
+    color: #fff;
+    padding: 50px;
+}
+.contact-info h2 { color: #d4a373; margin-bottom: 20px; }
+.info-item {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+.info-item i {
+    font-size: 1.5rem;
+    color: #d4a373;
+    margin-top: 5px;
+}
+.info-item p, .info-item a {
+    color: #ccc;
+    text-decoration: none;
+    margin: 0;
+}
+.social-connect h3 { color: #fff; margin-top: 40px; font-size: 1.2rem; }
+.social-connect a { color: #fff; margin-right: 15px; font-size: 1.5rem; }
+
+/* RIGHT COLUMN */
+.contact-form-wrapper {
+    padding: 50px;
+}
+.contact-form-wrapper h2 { margin-bottom: 30px; color: #333; }
+
+/* Form Styling (If using Contact Form 7) */
+.wpcf7 input, .wpcf7 textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+.wpcf7 input[type="submit"] {
+    background: #d4a373;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.wpcf7 input[type="submit"]:hover {
+    background: #b08d55;
+}
+
+/* MAP */
+.map-section { line-height: 0; }
+
+/* RESPONSIVE */
+@media(max-width: 768px) {
+    .contact-grid { grid-template-columns: 1fr; }
+    .page-hero { height: 300px; }
+    .hero-content h1 { font-size: 2.5rem; }
+}

@@ -1,10 +1,13 @@
 /**
- * Tadoba Theme JavaScript
+ * Tadoba Theme JavaScript - FINAL MERGED VERSION
+ * Handles: Mobile Menu, Smooth Scroll, Animations, and Package Details (Tabs/Accordion)
  */
 (function($) {
     'use strict';
 
-    // Mobile Menu Toggle
+    // ==========================================
+    // 1. MOBILE MENU (Your Existing Code)
+    // ==========================================
     $('#mobile-menu-toggle').on('click', function() {
         $('#mobile-menu').addClass('active');
         $('body').css('overflow', 'hidden');
@@ -23,7 +26,9 @@
         }
     });
 
-    // Smooth Scroll for anchor links
+    // ==========================================
+    // 2. SMOOTH SCROLL (Your Existing Code)
+    // ==========================================
     $('a[href^="#"]').on('click', function(e) {
         var href = $(this).attr('href');
         if (href !== '#' && href.length > 1) {
@@ -37,7 +42,9 @@
         }
     });
 
-    // Add scroll class to header
+    // ==========================================
+    // 3. HEADER SCROLL EFFECT (Your Existing Code)
+    // ==========================================
     $(window).on('scroll', function() {
         if ($(this).scrollTop() > 100) {
             $('.site-header').addClass('scrolled');
@@ -46,7 +53,9 @@
         }
     });
 
-    // Animation on scroll
+    // ==========================================
+    // 4. SCROLL ANIMATIONS (Your Existing Code)
+    // ==========================================
     if (typeof IntersectionObserver !== 'undefined') {
         const observerOptions = {
             threshold: 0.1,
@@ -64,7 +73,6 @@
             });
         }, observerOptions);
 
-        // Observe sections
         $('.welcome-section, .packages-section, .features-section, .cta-section').each(function() {
             $(this).css({
                 'opacity': '0',
@@ -75,7 +83,9 @@
         });
     }
 
-    // Package card hover effect
+    // ==========================================
+    // 5. PACKAGE CARD HOVER (Your Existing Code)
+    // ==========================================
     $('.package-card').hover(
         function() {
             $(this).find('.package-img img').css('transform', 'scale(1.1)');
@@ -84,5 +94,57 @@
             $(this).find('.package-img img').css('transform', 'scale(1)');
         }
     );
+
+    // ==========================================
+    // 6. NEW: SINGLE PACKAGE PAGE LOGIC
+    // ==========================================
+    
+    // A. Tabs Switching (Overview / Itinerary / Costs)
+    $('.tab-btn').on('click', function(e) {
+        // Prevent default anchor behavior
+        e.preventDefault(); 
+
+        // 1. Remove Active Class from all buttons and content
+        $('.tab-btn').removeClass('active');
+        $('.tab-content').hide().removeClass('active');
+
+        // 2. Add Active Class to clicked button
+        $(this).addClass('active');
+
+        // 3. Find the target ID
+        // Note: This logic looks for 'data-tab' attribute OR uses text content as fallback
+        var targetId = $(this).attr('data-tab');
+        
+        if (!targetId) {
+            // Fallback: If you didn't add data-tab, try to guess ID from text (e.g. "Overview" -> "#overview")
+            targetId = $(this).text().trim().toLowerCase();
+        }
+
+        // 4. Show the target content
+        $('#' + targetId).fadeIn();
+    });
+
+    // B. Itinerary Accordion (Expand/Collapse Days)
+    $('.day-header').on('click', function() {
+        // Toggle the content panel
+        $(this).next('.day-body').slideToggle();
+        
+        // Toggle the Plus/Minus icon
+        $(this).find('i').toggleClass('fa-plus fa-minus');
+    });
+
+    // C. Gallery Thumbnail Switcher (Optional - if you use thumbnails)
+    $('.gallery-thumbs img').on('click', function() {
+        var fullImgUrl = $(this).data('full');
+        var mainImg = $('#main-gallery-img');
+        
+        if(fullImgUrl && mainImg.length) {
+            mainImg.fadeOut(200, function() {
+                $(this).attr('src', fullImgUrl).fadeIn(200);
+            });
+            $('.gallery-thumbs img').removeClass('active');
+            $(this).addClass('active');
+        }
+    });
 
 })(jQuery);
