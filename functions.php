@@ -419,12 +419,16 @@ function tadoba_register_forest_cpt() {
             'singular_name' => 'Forest',
             'add_new' => 'Add New Forest',
             'add_new_item' => 'Add New Forest',
+            'all_items' => 'All Forests'
         ),
         'public' => true,
-        'has_archive' => true,
+        // This line explicitly names the archive page "forests"
+        'has_archive' => 'forests', 
         'menu_icon' => 'dashicons-palmtree',
         'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
-        'rewrite' => array('slug' => 'forests'),
+        // This ensures the URL is mysite.com/forests/
+        'rewrite' => array('slug' => 'forests', 'with_front' => false), 
+        'show_in_rest' => true, 
     ));
 }
 add_action('init', 'tadoba_register_forest_cpt');
@@ -496,3 +500,456 @@ function tadoba_save_forest($post_id) {
     }
 }
 add_action('save_post', 'tadoba_save_forest');
+
+// ... Previous Theme Setup Code ...
+
+// =========================================
+// 8. DYNAMIC FOREST EDITOR (The Magic Part)
+// =========================================
+
+// 1. Register Meta Box
+function tadoba_forest_full_meta() {
+    add_meta_box('forest_full_data', '🌿 Forest Content Editor', 'forest_editor_cb', 'forest', 'normal', 'high');
+}
+add_action('add_meta_boxes', 'tadoba_forest_full_meta');
+
+// 2. The Admin Interface
+function forest_editor_cb($post) {
+    wp_nonce_field('forest_save_nonce', 'forest_nonce');
+
+    // Retrieve ALL Data
+    $hero_sub = get_post_meta($post->ID, '_hero_sub', true);
+    $area = get_post_meta($post->ID, '_area_size', true);
+    $distance = get_post_meta($post->ID, '_distance_city', true);
+    $flora_img = get_post_meta($post->ID, '_flora_img', true);
+    $flora_list = maybe_unserialize(get_post_meta($post->ID, '_flora_list', true)) ?: [];
+    $zones_list = maybe_unserialize(get_post_meta($post->ID, '_zones_list', true)) ?: [];
+    $timing_list = maybe_unserialize(get_post_meta($post->ID, '_timing_list', true)) ?: [];
+    $rules_list = maybe_unserialize(get_post_meta($post->ID, '_rules_list', true)) ?: [];
+    $logistics_img = get_post_meta($post->ID, '_logistics_img', true);
+    $logistics_list = maybe_unserialize(get_post_meta($post->ID, '_logistics_list', true)) ?: [];
+    ?>
+
+    <style>
+        .meta-grp { background: #f8f8f8; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; }
+        .meta-grp h3 { margin-top: 0; color: #084D2A; border-bottom: 2px solid #DEED58; padding-bottom: 10px; }
+        .row-item { background: #fff; padding: 10px; margin-bottom: 5px; border: 1px solid #eee; display: flex; gap: 10px; align-items: center;}
+        .w-100 { width: 100%; margin-bottom: 5px; padding: 5px; }
+        .btn-add { background: #084D2A; color: #fff; border: none; padding: 5px 10px; cursor: pointer; }
+        .btn-rem { color: red; cursor: pointer; font-weight: bold; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+
+    <div class="meta-grp">
+        <h3>1. Hero & About Stats</h3>
+        <label>Hero Subtitle:</label>
+        <input type="text" name="hero_sub" value="<?php echo esc_attr($hero_sub); ?>" class="w-100">
+        <div class="grid-2">
+            <div><label>Total Area (e.g. 1,727 Sq. Km):</label><input type="text" name="area_size" value="<?php echo esc_attr($area); ?>" class="w-100"></div>
+            <div><label>Distance (e.g. 150km from Nagpur):</label><input type="text" name="distance_city" value="<?php echo esc_attr($distance); ?>" class="w-100"></div>
+        </div>
+    </div>
+
+    <div class="meta-grp">
+        <h3>2. Biodiversity (Flora/Fauna)</h3>
+        <label>Image URL:</label>
+        <input type="text" name="flora_img" value="<?php echo esc_attr($flora_img); ?>" class="w-100" placeholder="Paste Image URL">
+        <label>Bullet Points:</label>
+        <div id="flora-con">
+            <?php foreach($flora_list as $f): ?>
+                <div class="row-item"><input type="text" name="flora_list[]" value="<?php echo esc_attr($f); ?>" class="w-100"><span class="btn-rem">X</span></div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" onclick="addSimpleRow('flora-con', 'flora_list[]')">+ Add Bullet Point</button>
+    </div>
+
+    <div class="meta-grp">
+        <h3>3. Safari Zones</h3>
+        <div id="zones-con">
+            <?php foreach($zones_list as $k => $z): ?>
+                <div class="row-item">
+                    <input type="text" name="zones_list[<?php echo $k; ?>][title]" value="<?php echo esc_attr($z['title']); ?>" placeholder="Gate Name">
+                    <input type="text" name="zones_list[<?php echo $k; ?>][desc]" value="<?php echo esc_attr($z['desc']); ?>" placeholder="Description">
+                    <span class="btn-rem">X</span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-zone">+ Add Zone</button>
+    </div>
+
+    <div class="meta-grp">
+        <h3>4. Timings & Rules</h3>
+        <h4>Timings Table</h4>
+        <div id="timing-con">
+            <?php foreach($timing_list as $k => $t): ?>
+                <div class="row-item">
+                    <input type="text" name="timing_list[<?php echo $k; ?>][season]" value="<?php echo esc_attr($t['season']); ?>" placeholder="Season (e.g. Oct-Nov)">
+                    <input type="text" name="timing_list[<?php echo $k; ?>][am]" value="<?php echo esc_attr($t['am']); ?>" placeholder="Morning Time">
+                    <input type="text" name="timing_list[<?php echo $k; ?>][pm]" value="<?php echo esc_attr($t['pm']); ?>" placeholder="Evening Time">
+                    <span class="btn-rem">X</span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-time">+ Add Time Row</button>
+        
+        <br><br><h4>Jungle Rules</h4>
+        <div id="rules-con">
+            <?php foreach($rules_list as $r): ?>
+                <div class="row-item"><input type="text" name="rules_list[]" value="<?php echo esc_attr($r); ?>" class="w-100"><span class="btn-rem">X</span></div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" onclick="addSimpleRow('rules-con', 'rules_list[]')">+ Add Rule</button>
+    </div>
+
+    <div class="meta-grp">
+        <h3>5. Logistics</h3>
+        <label>Image URL:</label>
+        <input type="text" name="logistics_img" value="<?php echo esc_attr($logistics_img); ?>" class="w-100">
+        <div id="logistics-con">
+            <?php foreach($logistics_list as $k => $l): ?>
+                <div class="row-item">
+                    <input type="text" name="logistics_list[<?php echo $k; ?>][route]" value="<?php echo esc_attr($l['route']); ?>" placeholder="Route (e.g. Nagpur)">
+                    <input type="text" name="logistics_list[<?php echo $k; ?>][dist]" value="<?php echo esc_attr($l['dist']); ?>" placeholder="Distance (e.g. 120km)">
+                    <span class="btn-rem">X</span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-log">+ Add Distance Row</button>
+    </div>
+
+    <script>
+        function addSimpleRow(id, name) {
+            var el = document.getElementById(id);
+            var div = document.createElement('div');
+            div.className = 'row-item';
+            div.innerHTML = '<input type="text" name="'+name+'" class="w-100"><span class="btn-rem" onclick="this.parentNode.remove()">X</span>';
+            el.appendChild(div);
+        }
+        
+        document.getElementById('add-zone').addEventListener('click', function(){
+            var idx = document.querySelectorAll('#zones-con .row-item').length;
+            var html = '<div class="row-item"><input type="text" name="zones_list['+idx+'][title]" placeholder="Gate Name"><input type="text" name="zones_list['+idx+'][desc]" placeholder="Desc"><span class="btn-rem" onclick="this.parentNode.remove()">X</span></div>';
+            document.getElementById('zones-con').insertAdjacentHTML('beforeend', html);
+        });
+
+        document.getElementById('add-time').addEventListener('click', function(){
+            var idx = document.querySelectorAll('#timing-con .row-item').length;
+            var html = '<div class="row-item"><input type="text" name="timing_list['+idx+'][season]" placeholder="Season"><input type="text" name="timing_list['+idx+'][am]" placeholder="AM"><input type="text" name="timing_list['+idx+'][pm]" placeholder="PM"><span class="btn-rem" onclick="this.parentNode.remove()">X</span></div>';
+            document.getElementById('timing-con').insertAdjacentHTML('beforeend', html);
+        });
+
+        document.getElementById('add-log').addEventListener('click', function(){
+            var idx = document.querySelectorAll('#logistics-con .row-item').length;
+            var html = '<div class="row-item"><input type="text" name="logistics_list['+idx+'][route]" placeholder="Route"><input type="text" name="logistics_list['+idx+'][dist]" placeholder="Distance"><span class="btn-rem" onclick="this.parentNode.remove()">X</span></div>';
+            document.getElementById('logistics-con').insertAdjacentHTML('beforeend', html);
+        });
+
+        document.querySelectorAll('.btn-rem').forEach(btn => btn.addEventListener('click', function(){ this.parentNode.remove() }));
+    </script>
+    <?php
+}
+
+// 3. Save Data
+function save_forest_full_data($post_id) {
+    if (!isset($_POST['forest_nonce']) || !wp_verify_nonce($_POST['forest_nonce'], 'forest_save_nonce')) return;
+    
+    // Simple Fields
+    $fields = ['hero_sub', 'area_size', 'distance_city', 'flora_img', 'logistics_img'];
+    foreach($fields as $f) {
+        if(isset($_POST[$f])) update_post_meta($post_id, '_'.$f, sanitize_text_field($_POST[$f]));
+    }
+
+    // Array Fields
+    if(isset($_POST['flora_list'])) update_post_meta($post_id, '_flora_list', serialize($_POST['flora_list']));
+    if(isset($_POST['rules_list'])) update_post_meta($post_id, '_rules_list', serialize($_POST['rules_list']));
+    
+    // Complex Repeater Fields
+    if(isset($_POST['zones_list'])) update_post_meta($post_id, '_zones_list', serialize(array_values($_POST['zones_list'])));
+    if(isset($_POST['timing_list'])) update_post_meta($post_id, '_timing_list', serialize(array_values($_POST['timing_list'])));
+    if(isset($_POST['logistics_list'])) update_post_meta($post_id, '_logistics_list', serialize(array_values($_POST['logistics_list'])));
+}
+add_action('save_post', 'save_forest_full_data');
+
+// =========================================
+// 9. RESORT CPT & BUILDER (Updated)
+// =========================================
+
+// 1. Register Post Type
+function tadoba_register_resort_cpt() {
+    register_post_type('resort', array(
+        'labels' => array('name' => 'Resorts', 'singular_name' => 'Resort', 'add_new' => 'Add Resort', 'all_items' => 'All Resorts'),
+        'public' => true,
+        'has_archive' => true,
+        'menu_icon' => 'dashicons-building',
+        'supports' => array('title', 'editor', 'thumbnail'), // Featured Image = Hero Background
+        'rewrite' => array('slug' => 'resorts'),
+    ));
+}
+add_action('init', 'tadoba_register_resort_cpt');
+
+// 2. Meta Boxes
+function tadoba_resort_meta() {
+    add_meta_box('resort_data', '🏨 Resort Page Builder', 'resort_builder_cb', 'resort', 'normal', 'high');
+}
+add_action('add_meta_boxes', 'tadoba_resort_meta');
+
+// 3. Builder Interface
+function resort_builder_cb($post) {
+    wp_nonce_field('resort_save', 'resort_nonce');
+    
+    // Retrieve all values
+    $subtitle = get_post_meta($post->ID, '_resort_subtitle', true);
+    $intro_img = get_post_meta($post->ID, '_resort_intro_img', true);
+    $showcase_img = get_post_meta($post->ID, '_resort_showcase_img', true);
+    
+    // Bottom Section Data
+    $bottom_title = get_post_meta($post->ID, '_resort_bottom_title', true);
+    $bottom_desc = get_post_meta($post->ID, '_resort_bottom_desc', true);
+    $bottom_img = get_post_meta($post->ID, '_resort_bottom_img', true);
+    
+    $amenities = maybe_unserialize(get_post_meta($post->ID, '_resort_amenities', true)) ?: [];
+    $rooms = maybe_unserialize(get_post_meta($post->ID, '_resort_rooms', true)) ?: [];
+    ?>
+    
+    <style>
+        .r-group { background: #fdfdfd; padding: 15px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .r-group h3 { margin-top: 0; color: #E67D3C; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .r-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; background: #fff; padding: 10px; border: 1px solid #eee; }
+        .w-100 { width: 100%; padding: 8px; margin-bottom: 10px; }
+        .btn-add { background: #084D2A; color: white; padding: 8px 15px; border: none; cursor: pointer; }
+        .btn-del { color: red; cursor: pointer; margin-left: 10px; font-weight: bold; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+
+    <div class="r-group">
+        <h3>1. Hero Section</h3>
+        <label>Subtitle (e.g. Welcome to Nature's Sprout):</label>
+        <input type="text" name="resort_subtitle" value="<?php echo esc_attr($subtitle); ?>" class="w-100">
+    </div>
+
+    <div class="r-group">
+        <h3>2. Intro Image (Nature Enthusiasts)</h3>
+        <label>Side Image URL:</label>
+        <input type="text" name="resort_intro_img" value="<?php echo esc_attr($intro_img); ?>" class="w-100" placeholder="https://...">
+    </div>
+
+    <div class="r-group">
+        <h3>3. Parallax Showcase</h3>
+        <label>Full Width Image URL:</label>
+        <input type="text" name="resort_showcase_img" value="<?php echo esc_attr($showcase_img); ?>" class="w-100" placeholder="https://...">
+    </div>
+
+    <div class="r-group">
+        <h3>4. Amenities</h3>
+        <div id="amenity-list">
+            <?php foreach($amenities as $k => $a): ?>
+            <div class="r-row">
+                <input type="text" name="amenities[<?php echo $k; ?>][icon]" value="<?php echo esc_attr($a['icon']); ?>" placeholder="Icon (fas fa-wifi)">
+                <input type="text" name="amenities[<?php echo $k; ?>][title]" value="<?php echo esc_attr($a['title']); ?>" placeholder="Title">
+                <input type="text" name="amenities[<?php echo $k; ?>][desc]" value="<?php echo esc_attr($a['desc']); ?>" placeholder="Short Desc">
+                <span class="btn-del" onclick="this.parentNode.remove()">X</span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-amenity">+ Add Amenity</button>
+    </div>
+
+    <div class="r-group">
+        <h3>5. Rooms / Packages</h3>
+        <div id="room-list">
+            <?php foreach($rooms as $k => $r): ?>
+            <div class="r-row">
+                <input type="text" name="rooms[<?php echo $k; ?>][title]" value="<?php echo esc_attr($r['title']); ?>" placeholder="Room Name" style="width: 30%;">
+                <input type="text" name="rooms[<?php echo $k; ?>][price]" value="<?php echo esc_attr($r['price']); ?>" placeholder="Price" style="width: 20%;">
+                <input type="text" name="rooms[<?php echo $k; ?>][img]" value="<?php echo esc_attr($r['img']); ?>" placeholder="Image URL" style="width: 50%;">
+                <span class="btn-del" onclick="this.parentNode.remove()">X</span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-room">+ Add Room</button>
+    </div>
+
+    <div class="r-group">
+        <h3>6. Bottom About Section</h3>
+        <label>Title:</label>
+        <input type="text" name="resort_bottom_title" value="<?php echo esc_attr($bottom_title); ?>" class="w-100">
+        <label>Description:</label>
+        <textarea name="resort_bottom_desc" rows="3" class="w-100"><?php echo esc_textarea($bottom_desc); ?></textarea>
+        <label>Side Image URL:</label>
+        <input type="text" name="resort_bottom_img" value="<?php echo esc_attr($bottom_img); ?>" class="w-100">
+    </div>
+
+    <script>
+        document.getElementById('add-amenity').addEventListener('click', function(){
+            var i = document.querySelectorAll('#amenity-list .r-row').length;
+            var h = '<div class="r-row"><input type="text" name="amenities['+i+'][icon]" placeholder="Icon"><input type="text" name="amenities['+i+'][title]" placeholder="Title"><input type="text" name="amenities['+i+'][desc]" placeholder="Desc"><span class="btn-del" onclick="this.parentNode.remove()">X</span></div>';
+            document.getElementById('amenity-list').insertAdjacentHTML('beforeend', h);
+        });
+        document.getElementById('add-room').addEventListener('click', function(){
+            var i = document.querySelectorAll('#room-list .r-row').length;
+            var h = '<div class="r-row"><input type="text" name="rooms['+i+'][title]" placeholder="Name" style="width:30%"><input type="text" name="rooms['+i+'][price]" placeholder="Price" style="width:20%"><input type="text" name="rooms['+i+'][img]" placeholder="Image URL" style="width:50%"><span class="btn-del" onclick="this.parentNode.remove()">X</span></div>';
+            document.getElementById('room-list').insertAdjacentHTML('beforeend', h);
+        });
+    </script>
+    <?php
+}
+
+// 4. Save Logic
+function tadoba_save_resort($post_id) {
+    if (!isset($_POST['resort_nonce']) || !wp_verify_nonce($_POST['resort_nonce'], 'resort_save')) return;
+    
+    $fields = ['resort_subtitle', 'resort_intro_img', 'resort_showcase_img', 'resort_bottom_title', 'resort_bottom_desc', 'resort_bottom_img'];
+    foreach($fields as $f) if(isset($_POST[$f])) update_post_meta($post_id, '_'.$f, sanitize_text_field($_POST[$f]));
+
+    if(isset($_POST['amenities'])) update_post_meta($post_id, '_resort_amenities', serialize(array_values($_POST['amenities'])));
+    if(isset($_POST['rooms'])) update_post_meta($post_id, '_resort_rooms', serialize(array_values($_POST['rooms'])));
+}
+add_action('save_post', 'tadoba_save_resort');
+
+// =========================================
+// 10. ABOUT PAGE BUILDER (Fixed & Renamed)
+// =========================================
+
+function tadoba_about_meta() {
+    global $post;
+    if(!empty($post)) {
+        $page_template = get_post_meta($post->ID, '_wp_page_template', true);
+        if($page_template == 'page-about.php') {
+            add_meta_box('about_page_data', '🌿 About Page Builder', 'about_builder_cb', 'page', 'normal', 'high');
+        }
+    }
+}
+add_action('add_meta_boxes', 'tadoba_about_meta');
+
+// Updated Builder Interface
+function about_builder_cb($post) {
+    wp_nonce_field('about_save', 'about_nonce');
+    
+    // Retrieve Existing Data
+    $intro_img = get_post_meta($post->ID, '_about_intro_img', true);
+    $hero_img = get_post_meta($post->ID, '_about_hero_img', true);
+    $quote = get_post_meta($post->ID, '_about_quote', true);
+    
+    // NEW: Founder/Signature Data
+    $founder_name = get_post_meta($post->ID, '_about_founder_name', true);
+    $founder_role = get_post_meta($post->ID, '_about_founder_role', true);
+    $founder_img = get_post_meta($post->ID, '_about_founder_img', true);
+    
+    // Arrays
+    $stats = maybe_unserialize(get_post_meta($post->ID, '_about_stats', true)) ?: [];
+    $features = maybe_unserialize(get_post_meta($post->ID, '_about_features', true)) ?: [];
+    $team = maybe_unserialize(get_post_meta($post->ID, '_about_team', true)) ?: [];
+    ?>
+    
+    <style>
+        .a-group { background: #fdfdfd; padding: 15px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .a-group h3 { margin-top: 0; color: #E67D3C; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .a-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; background: #fff; padding: 10px; border: 1px solid #eee; }
+        .w-100 { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        .btn-add { background: #084D2A; color: white; padding: 8px 15px; border: none; cursor: pointer; border-radius: 4px; }
+        .btn-del { color: red; cursor: pointer; margin-left: 10px; font-weight: bold; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+    </style>
+
+    <div class="a-group">
+        <h3>1. Top Section (Right Side)</h3>
+        <label>Intro Image URL:</label>
+        <input type="text" name="about_intro_img" value="<?php echo esc_attr($intro_img); ?>" class="w-100">
+    </div>
+
+    <div class="a-group">
+        <h3>2. Middle Hero Section</h3>
+        <label>Wide Safari Image URL:</label>
+        <input type="text" name="about_hero_img" value="<?php echo esc_attr($hero_img); ?>" class="w-100">
+    </div>
+
+    <div class="a-group">
+        <h3>3. Journey Section (Quote & Signature)</h3>
+        <label>Main Quote Text:</label>
+        <textarea name="about_quote" rows="3" class="w-100"><?php echo esc_textarea($quote); ?></textarea>
+        
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <label>Signature Name (e.g. James Walker):</label>
+        <input type="text" name="about_founder_name" value="<?php echo esc_attr($founder_name); ?>" class="w-100">
+        
+        <label>Signature Role (e.g. Founder & CEO):</label>
+        <input type="text" name="about_founder_role" value="<?php echo esc_attr($founder_role); ?>" class="w-100">
+        
+        <label>Signature Image URL:</label>
+        <input type="text" name="about_founder_img" value="<?php echo esc_attr($founder_img); ?>" class="w-100">
+    </div>
+
+    <div class="a-group">
+        <h3>4. Stats Counter</h3>
+        <div id="stats-list">
+            <?php foreach($stats as $k => $s): ?>
+            <div class="a-row">
+                <input type="text" name="tadoba_stats[<?php echo $k; ?>][num]" value="<?php echo esc_attr($s['num']); ?>" placeholder="Number">
+                <input type="text" name="tadoba_stats[<?php echo $k; ?>][label]" value="<?php echo esc_attr($s['label']); ?>" placeholder="Label">
+                <input type="text" name="tadoba_stats[<?php echo $k; ?>][icon]" value="<?php echo esc_attr($s['icon']); ?>" placeholder="Icon">
+                <span class="btn-del" onclick="this.parentNode.remove()">X</span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-stat">+ Add Stat</button>
+    </div>
+
+    <div class="a-group">
+        <h3>5. Why Choose Us</h3>
+        <div id="feat-list">
+            <?php foreach($features as $k => $f): ?>
+            <div class="a-row">
+                <input type="text" name="tadoba_features[<?php echo $k; ?>][num]" value="<?php echo esc_attr($f['num']); ?>" placeholder="01" style="width: 60px;">
+                <input type="text" name="tadoba_features[<?php echo $k; ?>][title]" value="<?php echo esc_attr($f['title']); ?>" placeholder="Title">
+                <input type="text" name="tadoba_features[<?php echo $k; ?>][desc]" value="<?php echo esc_attr($f['desc']); ?>" placeholder="Description" style="width: 50%;">
+                <span class="btn-del" onclick="this.parentNode.remove()">X</span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-feat">+ Add Feature</button>
+    </div>
+
+    <div class="a-group">
+        <h3>6. Team Members</h3>
+        <div id="team-list">
+            <?php foreach($team as $k => $t): ?>
+            <div class="a-row">
+                <input type="text" name="tadoba_team[<?php echo $k; ?>][name]" value="<?php echo esc_attr($t['name']); ?>" placeholder="Name">
+                <input type="text" name="tadoba_team[<?php echo $k; ?>][role]" value="<?php echo esc_attr($t['role']); ?>" placeholder="Role">
+                <input type="text" name="tadoba_team[<?php echo $k; ?>][img]" value="<?php echo esc_attr($t['img']); ?>" placeholder="Image URL" style="width: 40%;">
+                <span class="btn-del" onclick="this.parentNode.remove()">X</span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn-add" id="add-team">+ Add Member</button>
+    </div>
+
+    <script>
+        const addRow = (id, html) => {
+            const container = document.getElementById(id);
+            const count = container.querySelectorAll('.a-row').length;
+            container.insertAdjacentHTML('beforeend', html.replace(/INDEX/g, count));
+        };
+        document.getElementById('add-stat').onclick = () => addRow('stats-list', '<div class="a-row"><input type="text" name="tadoba_stats[INDEX][num]" placeholder="Num"><input type="text" name="tadoba_stats[INDEX][label]" placeholder="Label"><input type="text" name="tadoba_stats[INDEX][icon]" placeholder="Icon"><span class="btn-del" onclick="this.parentNode.remove()">X</span></div>');
+        document.getElementById('add-feat').onclick = () => addRow('feat-list', '<div class="a-row"><input type="text" name="tadoba_features[INDEX][num]" placeholder="01" style="width:60px"><input type="text" name="tadoba_features[INDEX][title]" placeholder="Title"><input type="text" name="tadoba_features[INDEX][desc]" placeholder="Desc" style="width:50%"><span class="btn-del" onclick="this.parentNode.remove()">X</span></div>');
+        document.getElementById('add-team').onclick = () => addRow('team-list', '<div class="a-row"><input type="text" name="tadoba_team[INDEX][name]" placeholder="Name"><input type="text" name="tadoba_team[INDEX][role]" placeholder="Role"><input type="text" name="tadoba_team[INDEX][img]" placeholder="Image URL" style="width:40%"><span class="btn-del" onclick="this.parentNode.remove()">X</span></div>');
+    </script>
+    <?php
+}
+
+function tadoba_save_about($post_id) {
+    if (!isset($_POST['about_nonce']) || !wp_verify_nonce($_POST['about_nonce'], 'about_save')) return;
+    
+    // Save Standard Fields
+    $fields = ['about_intro_img', 'about_hero_img', 'about_quote', 'about_founder_name', 'about_founder_role', 'about_founder_img'];
+    foreach($fields as $f) {
+        if(isset($_POST[$f])) update_post_meta($post_id, '_'.$f, sanitize_text_field($_POST[$f]));
+    }
+    
+    // Save Arrays
+    if(isset($_POST['tadoba_stats'])) update_post_meta($post_id, '_about_stats', serialize(array_values($_POST['tadoba_stats'])));
+    if(isset($_POST['tadoba_features'])) update_post_meta($post_id, '_about_features', serialize(array_values($_POST['tadoba_features'])));
+    if(isset($_POST['tadoba_team'])) update_post_meta($post_id, '_about_team', serialize(array_values($_POST['tadoba_team'])));
+}
+add_action('save_post', 'tadoba_save_about');

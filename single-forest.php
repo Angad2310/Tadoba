@@ -1,105 +1,237 @@
-<?php get_header(); ?>
+<?php 
+/* Template Name: Forest Detail */
+get_header(); // Needed for WP hooks, but we'll override visual header below
+?>
 
 <?php while (have_posts()) : the_post(); 
     $pid = get_the_ID();
-    $location = get_post_meta($pid, '_forest_location', true);
-    $best_time = get_post_meta($pid, '_forest_best_time', true);
-    $airport = get_post_meta($pid, '_forest_airport', true);
-    $closed_day = get_post_meta($pid, '_forest_closed_day', true);
-    $timing = get_post_meta($pid, '_forest_safari_timing', true);
     
-    $core_zones = maybe_unserialize(get_post_meta($pid, '_forest_core_zones', true));
-    $buffer_zones = maybe_unserialize(get_post_meta($pid, '_forest_buffer_zones', true));
+    // Retrieve ALL Dynamic Data
+    $hero_img = get_the_post_thumbnail_url($pid, 'full');
+    $hero_sub = get_post_meta($pid, '_hero_sub', true);
+    $about_desc = get_the_content(); // Main Editor
+    
+    $area = get_post_meta($pid, '_area_size', true);
+    $distance = get_post_meta($pid, '_distance_city', true);
+    
+    $flora_img = get_post_meta($pid, '_flora_img', true);
+    $flora_list = maybe_unserialize(get_post_meta($pid, '_flora_list', true)) ?: [];
+    
+    $zones_list = maybe_unserialize(get_post_meta($pid, '_zones_list', true)) ?: [];
+    $timing_list = maybe_unserialize(get_post_meta($pid, '_timing_list', true)) ?: [];
+    $rules_list = maybe_unserialize(get_post_meta($pid, '_rules_list', true)) ?: [];
+    
+    $logistics_img = get_post_meta($pid, '_logistics_img', true);
+    $logistics_list = maybe_unserialize(get_post_meta($pid, '_logistics_list', true)) ?: [];
 ?>
 
-<div class="forest-hero" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('<?php echo get_the_post_thumbnail_url($pid, 'full'); ?>');">
-    <div class="container hero-content">
-        <span class="hero-tag">National Park</span>
-        <h1><?php the_title(); ?></h1>
-        <p><i class="fas fa-map-marker-alt"></i> <?php echo esc_html($location); ?></p>
-    </div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans&family=Anybody:wght@400;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 
-<div class="container forest-layout">
-    <div class="forest-main">
-        
-        <div class="forest-info-bar">
-            <div class="f-info-box">
-                <i class="fas fa-sun"></i>
-                <div><strong>Best Time</strong><span><?php echo esc_html($best_time); ?></span></div>
-            </div>
-            <div class="f-info-box">
-                <i class="fas fa-plane"></i>
-                <div><strong>Nearest City</strong><span><?php echo esc_html($airport); ?></span></div>
-            </div>
-            <div class="f-info-box">
-                <i class="fas fa-calendar-times"></i>
-                <div><strong>Closed On</strong><span><?php echo esc_html($closed_day); ?></span></div>
-            </div>
-        </div>
+   
 
-        <section class="details-section">
-            <h2 class="h2-title">About the Park</h2>
-            <div class="overview-txt"><?php the_content(); ?></div>
-        </section>
-
-        <section class="details-section">
-            <h2 class="h2-title">Safari Zones</h2>
-            <div class="zones-grid">
-                <?php if($core_zones): ?>
-                <div class="zone-card core">
-                    <h3><i class="fas fa-paw"></i> Core Zones</h3>
-                    <ul>
-                        <?php foreach($core_zones as $zone) echo "<li>$zone</li>"; ?>
-                    </ul>
-                </div>
-                <?php endif; ?>
-
-                <?php if($buffer_zones): ?>
-                <div class="zone-card buffer">
-                    <h3><i class="fas fa-tree"></i> Buffer Zones</h3>
-                    <ul>
-                        <?php foreach($buffer_zones as $zone) echo "<li>$zone</li>"; ?>
-                    </ul>
-                </div>
-                <?php endif; ?>
-            </div>
-        </section>
-
-        <?php if($timing): ?>
-        <section class="details-section">
-            <h2 class="h2-title">Safari Timings</h2>
-            <div class="timing-box">
-                <i class="fas fa-clock"></i>
-                <p><?php echo wpautop(esc_html($timing)); ?></p>
-            </div>
-        </section>
+    <section class="hero-section">
+        <?php if($hero_img): ?>
+        <img src="<?php echo esc_url($hero_img); ?>" alt="<?php the_title(); ?>" class="hero-image">
         <?php endif; ?>
-
-    </div>
-
-    <aside class="forest-sidebar">
-        <div class="sidebar-widget">
-            <h3>Explore Packages</h3>
-            <div class="mini-package-list">
-                <?php 
-                $packages = new WP_Query(array('post_type' => 'package', 'posts_per_page' => 3));
-                while($packages->have_posts()): $packages->the_post(); 
-                    $price = get_post_meta(get_the_ID(), '_package_price', true);
-                ?>
-                <a href="<?php the_permalink(); ?>" class="mini-pkg">
-                    <div class="mini-img" style="background-image: url('<?php echo get_the_post_thumbnail_url(get_the_ID(), 'medium'); ?>');"></div>
-                    <div class="mini-info">
-                        <h4><?php the_title(); ?></h4>
-                        <span class="mini-price">₹<?php echo $price; ?> / Person</span>
-                    </div>
-                </a>
-                <?php endwhile; wp_reset_postdata(); ?>
-            </div>
-            <a href="<?php echo site_url('/packages'); ?>" class="view-all-btn">View All Safaris</a>
+        
+        <div class="hero-content">
+            <h1 class="hero-title reveal-on-scroll"><?php the_title(); ?></h1>
+            <p class="section-description reveal-on-scroll" style="color:#fff;"><?php echo esc_html($hero_sub); ?></p>
+            <a href="#about" class="btn-primary reveal-on-scroll">Explore Reserve</a>
         </div>
-    </aside>
-</div>
+        <div class="feed-to-cream"></div>
+    </section>
 
+    <section class="section" id="about">
+        <div class="pattern-bg"></div>
+        <div class="container">
+            <div class="about-grid">
+                <div class="reveal-on-scroll">
+                    <span class="section-subtitle">The Legacy</span>
+                    <h2 class="section-title">An Amalgamation of <span style="color: var(--tmp-primary-color);">Wildlife</span></h2>
+                    <div class="section-description">
+                        <?php the_content(); ?>
+                    </div>
+                    
+                    <div style="display: flex; gap: 30px; margin-top: 15px; justify-content: center;">
+                        <div style="text-align: center;">
+                            <h4 style="color: var(--tmp-heading-color); font-size: 24px;"><?php echo esc_html($area); ?></h4>
+                            <p style="font-size: 11px; color: #777; text-transform: uppercase;">Total Area</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <h4 style="color: var(--tmp-heading-color); font-size: 24px;"><?php echo esc_html($distance); ?></h4>
+                            <p style="font-size: 11px; color: #777; text-transform: uppercase;">Distance</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal-on-scroll about-image-wrapper">
+                    <?php if($hero_img): ?>
+                        <img src="<?php echo esc_url($hero_img); ?>" alt="About Forest" class="about-image">
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="flora" style="background-color: var(--tmp-section-bg-alt);">
+        <div class="feed-from-cream"></div>
+        <div class="container">
+            <div class="about-grid reverse">
+                <div class="reveal-on-scroll about-image-wrapper">
+                    <?php if($flora_img): ?>
+                        <img src="<?php echo esc_url($flora_img); ?>" alt="Flora" class="about-image">
+                    <?php endif; ?>
+                </div>
+                <div class="reveal-on-scroll">
+                    <span class="section-subtitle">Nature's Canopy</span>
+                    <h2 class="section-title">Rich <span style="color: var(--tmp-primary-color);">Biodiversity</span></h2>
+                    
+                    <div class="info-card">
+                        <ul class="rules-list">
+                            <?php foreach($flora_list as $f): ?>
+                                <li><?php echo esc_html($f); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="zones">
+        <div class="container">
+            <div style="text-align: center; max-width: 800px; margin: 0 auto 30px;">
+                <span class="section-subtitle">Discovery</span>
+                <h2 class="section-title">Safari Gates</h2>
+                <p class="section-description">Explore the various entry points to the wilderness.</p>
+            </div>
+
+            <div class="amenities-grid reveal-on-scroll">
+                <?php foreach($zones_list as $zone): ?>
+                <div class="amenity-card">
+                    <h4><?php echo esc_html($zone['title']); ?></h4>
+                    <p><?php echo esc_html($zone['desc']); ?></p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="timings" style="background-color: #fff;">
+        <div class="feed-from-cream"></div>
+        <div class="container">
+            <div class="about-grid">
+                <div class="reveal-on-scroll" style="width: 100%;">
+                    <span class="section-subtitle">Planning</span>
+                    <h2 class="section-title">Safari Timings</h2>
+                    <div class="info-card">
+                        <table class="info-table">
+                            <thead>
+                                <tr><th>Season</th><th>Morning</th><th>Evening</th></tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($timing_list as $t): ?>
+                                <tr>
+                                    <td><?php echo esc_html($t['season']); ?></td>
+                                    <td><?php echo esc_html($t['am']); ?></td>
+                                    <td><?php echo esc_html($t['pm']); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="reveal-on-scroll" style="width: 100%;">
+                    <span class="section-subtitle">Etiquette</span>
+                    <h2 class="section-title">Jungle Rules</h2>
+                    <div class="info-card" style="background: var(--tmp-heading-color); color: #fff;">
+                        <ul class="rules-list" style="color: #eee;">
+                            <?php foreach($rules_list as $r): ?>
+                                <li style="color: #fff;"><?php echo esc_html($r); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="logistics" style="background-color: var(--tmp-section-bg-alt);">
+        <div class="container">
+            <div class="about-grid reverse">
+                <div class="reveal-on-scroll about-image-wrapper">
+                    <?php if($logistics_img): ?>
+                        <img src="<?php echo esc_url($logistics_img); ?>" alt="Logistics" class="about-image">
+                    <?php endif; ?>
+                </div>
+                <div class="reveal-on-scroll" style="width: 100%;">
+                    <span class="section-subtitle">Logistics</span>
+                    <h2 class="section-title">Getting There</h2>
+                    <div class="info-card">
+                        <table class="info-table">
+                            <thead>
+                                <tr><th>Route</th><th>Distance</th></tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($logistics_list as $l): ?>
+                                <tr>
+                                    <td><?php echo esc_html($l['route']); ?></td>
+                                    <td><?php echo esc_html($l['dist']); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="feed-to-dark"></div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <span class="footer-logo">WildTrek</span>
+                    <p>Your expert guide to India's premier tiger corridor.</p>
+                </div>
+                <div>
+                    <h3>Explore</h3>
+                    <a href="#about">About</a>
+                    <a href="#zones">Gates</a>
+                    <a href="#timings">Timings</a>
+                </div>
+                <div>
+                    <h3>Contact</h3>
+                    <p>+91 98765 43210</p>
+                    <p>info@tadoba.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> WildTrek. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleNav() {
+            document.getElementById('mobileNav').classList.toggle('active');
+        }
+
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('is-visible'); }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
 <?php endwhile; ?>
-<?php get_footer(); ?>

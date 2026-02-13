@@ -1,190 +1,155 @@
-<?php
-/**
- * Single Resort Template
- */
-get_header();
+<?php get_header(); ?>
 
-while (have_posts()) : the_post();
-    $phone = get_post_meta(get_the_ID(), '_resort_phone', true);
-    $email = get_post_meta(get_the_ID(), '_resort_email', true);
-    $location_text = get_post_meta(get_the_ID(), '_resort_location_text', true);
-    $features = get_post_meta(get_the_ID(), '_resort_features', true);
-    $features_array = !empty($features) ? explode("\n", $features) : array();
+<style>
+    .reveal-on-scroll { opacity: 1 !important; transform: none !important; }
+    .resort-page-wrap { background: #fdfaf5; overflow: hidden; }
+</style>
+
+<?php while (have_posts()) : the_post(); 
+    $pid = get_the_ID();
+    
+    // Retrieve All Data
+    $subtitle = get_post_meta($pid, '_resort_subtitle', true);
+    $hero_bg = get_the_post_thumbnail_url($pid, 'full');
+    
+    $intro_img = get_post_meta($pid, '_resort_intro_img', true);
+    $showcase_img = get_post_meta($pid, '_resort_showcase_img', true);
+    
+    $bottom_title = get_post_meta($pid, '_resort_bottom_title', true);
+    $bottom_desc = get_post_meta($pid, '_resort_bottom_desc', true);
+    $bottom_img = get_post_meta($pid, '_resort_bottom_img', true);
+    
+    $amenities = maybe_unserialize(get_post_meta($pid, '_resort_amenities', true)) ?: [];
+    $rooms = maybe_unserialize(get_post_meta($pid, '_resort_rooms', true)) ?: [];
 ?>
 
-<!-- 1. HERO SECTION -->
-<section class="hero-section">
-    <?php if (has_post_thumbnail()): ?>
-        <?php the_post_thumbnail('hero-image', array('class' => 'hero-image', 'alt' => get_the_title())); ?>
-    <?php else: ?>
-        <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1600" alt="<?php the_title(); ?>" class="hero-image">
-    <?php endif; ?>
-    <div class="hero-content">
-        <p class="hero-subtitle reveal-on-scroll">Welcome to <?php the_title(); ?></p>
-        <h1 class="hero-title reveal-on-scroll"><?php the_title(); ?></h1>
-        <p class="hero-description reveal-on-scroll"><?php echo wp_trim_words(get_the_excerpt(), 20); ?></p>
-        <a href="#packages" class="btn-primary reveal-on-scroll">Explore Our Stays</a>
-    </div>
-    <div class="hero-bottom-fade-overlay"></div>
-</section>
+<div class="resort-page-wrap">
 
-<!-- 2. NATURE ENTHUSIASTS (TEXT) -->
-<section class="section grid-section" id="enthusiasts">
-    <div class="pattern-bg"></div>
-    <div class="container">
-        <div class="about-grid">
-            <!-- Text (First) -->
-            <div class="about-content reveal-on-scroll">
-                <p class="section-subtitle">Nature Enthusiasts</p>
-                <h2 class="section-title">Outdoor Adventures for <span style="color: var(--tmp-primary-color);">Nature Enthusiasts</span></h2>
-                <div class="section-description">
-                    <?php the_content(); ?>
+    <section class="resort-hero" style="position: relative; height: 85vh; display: flex; align-items: center; justify-content: center; text-align: center; color: #fff;">
+        <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: #000;">
+            <?php if($hero_bg): ?>
+                <img src="<?php echo esc_url($hero_bg); ?>" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+            <?php endif; ?>
+        </div>
+        
+        <div class="hero-content" style="position: relative; z-index: 2; max-width: 800px; padding: 20px;">
+            <p style="font-size: 1.2rem; color: #DEED58; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">
+                <?php echo esc_html($subtitle); ?>
+            </p>
+            <h1 style="font-size: clamp(40px, 6vw, 80px); line-height: 1.1; margin-bottom: 25px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+                <?php the_title(); ?>
+            </h1>
+            <a href="#rooms" style="background: #E67D3C; color: #fff; padding: 15px 40px; border-radius: 50px; font-weight: bold; text-decoration: none; display: inline-block;">
+                Explore Stays
+            </a>
+        </div>
+        <div style="position: absolute; bottom:0; left:0; width:100%; height:100px; background: linear-gradient(to top, #fdfaf5, transparent);"></div>
+    </section>
+
+    <section class="section" style="padding: 80px 0;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 60px; align-items: center;">
+                <div>
+                    <span style="color: #E67D3C; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Nature Enthusiasts</span>
+                    <h2 style="font-size: 2.5rem; color: #084D2A; margin: 15px 0 25px;">
+                        Luxury in the <span style="color: #E67D3C;">Wilderness</span>
+                    </h2>
+                    <div style="font-size: 1.1rem; line-height: 1.8; color: #555;">
+                        <?php the_content(); ?>
+                    </div>
                 </div>
-                <?php if (!empty($features_array)): ?>
-                <div style="margin-top: 30px;">
-                    <ul class="features-list">
-                        <?php foreach ($features_array as $feature): 
-                            $feature = trim($feature);
-                            if (empty($feature)) continue;
-                            // Split by colon to get title and description
-                            $parts = explode(':', $feature, 2);
-                            $title = isset($parts[0]) ? trim($parts[0]) : '';
-                            $desc = isset($parts[1]) ? trim($parts[1]) : '';
-                        ?>
-                            <li>
-                                <i class="fas fa-map-marker-alt"></i> 
-                                <span><strong><?php echo esc_html($title); ?>:</strong> <?php echo esc_html($desc); ?></span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-                <?php endif; ?>
-                <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap;">
-                    <a href="#booking" class="btn-primary">Check Availability</a>
-                    <?php if ($phone): ?>
-                        <a href="tel:<?php echo esc_attr($phone); ?>" class="btn-primary" style="background: #fff; color: var(--tmp-primary-color); border: 2px solid var(--tmp-primary-color);">
-                            Call: <?php echo esc_html($phone); ?>
-                        </a>
+                <div>
+                    <?php if($intro_img): ?>
+                        <img src="<?php echo esc_url($intro_img); ?>" style="width: 100%; border-radius: 20px; box-shadow: 20px 20px 0 rgba(230, 125, 60, 0.1);">
+                    <?php else: ?>
+                        <div style="width: 100%; height: 400px; background: #ddd; border-radius: 20px;"></div>
                     <?php endif; ?>
                 </div>
             </div>
-            <!-- Image (Hidden on Mobile for flow) -->
-            <div class="reveal-on-scroll">
-                <?php if (has_post_thumbnail()): ?>
-                    <?php the_post_thumbnail('resort-thumbnail', array('class' => 'about-image', 'alt' => get_the_title())); ?>
-                <?php else: ?>
-                    <img src="https://images.unsplash.com/photo-1583341612074-ccea5cd64f6a?w=800" alt="Resort View" class="about-image">
-                <?php endif; ?>
+        </div>
+    </section>
+
+    <?php if($showcase_img): ?>
+    <section style="height: 500px; position: relative; background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; background-image: url('<?php echo esc_url($showcase_img); ?>'); display: flex; align-items: center; justify-content: center;">
+        <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.3);"></div>
+        <h2 style="position: relative; z-index: 2; color: #fff; font-size: 3rem; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">Immerse Yourself</h2>
+    </section>
+    <?php endif; ?>
+
+    <?php if(!empty($amenities)): ?>
+    <section class="section" id="activities" style="padding: 80px 0;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <span style="color: #E67D3C; text-transform: uppercase; font-weight: bold;">Comforts</span>
+                <h2 style="font-size: 2.5rem; color: #084D2A;">Curated Experiences</h2>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+                <?php foreach($amenities as $a): ?>
+                <div style="background: #fff; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                    <div style="font-size: 35px; color: #E67D3C; margin-bottom: 15px;">
+                        <i class="<?php echo esc_attr($a['icon']); ?>"></i>
+                    </div>
+                    <h4 style="font-size: 1.2rem; color: #084D2A; margin-bottom: 10px;"><?php echo esc_html($a['title']); ?></h4>
+                    <p style="color: #666; font-size: 0.95rem;"><?php echo esc_html($a['desc']); ?></p>
+                </div>
+                <?php endforeach; ?>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+    <?php endif; ?>
 
-<!-- 3. RESORT IMAGE SHOWCASE (IMAGE) -->
-<section class="resort-showcase-section" id="showcase">
-    <div class="section-fade-top"></div>
-    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600" alt="Resort Ambience" class="resort-showcase-image">
-    <div class="section-fade-bottom"></div>
-</section>
+    <?php if(!empty($rooms)): ?>
+    <section class="section" id="rooms" style="padding: 80px 0; background: #fff;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <span style="color: #E67D3C; text-transform: uppercase; font-weight: bold;">Stay</span>
+                <h2 style="font-size: 2.5rem; color: #084D2A;">Accommodation & Packages</h2>
+            </div>
 
-<!-- 4. FEATURES (TEXT/ICONS) -->
-<section class="section activities-section-redesigned" id="activities">
-    <div class="container">
-        <div class="activities-intro reveal-on-scroll">
-            <p class="section-subtitle">Curated Experiences</p>
-            <h2 class="section-title">Unforgettable Adventures Await</h2>
-            <p class="section-description">Immerse yourself in the wild beauty with our handpicked experiences.</p>
-        </div>
-
-        <div class="amenities-grid reveal-on-scroll">
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-utensils"></i></div><h4>Bush Breakfast</h4><p>Breakfast in wilderness</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-swimming-pool"></i></div><h4>Swimming Pool</h4><p>Relax by the pool</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-star"></i></div><h4>Star Gazing</h4><p>Crystal clear night skies</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-camera"></i></div><h4>Photography Tours</h4><p>Guided sessions</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-users"></i></div><h4>Tribal Visits</h4><p>Local culture</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-child"></i></div><h4>Kids Activities</h4><p>Safe nature activities</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-spa"></i></div><h4>Wellness & Yoga</h4><p>Morning sessions</p></div>
-            <div class="amenity-card"><div class="amenity-icon"><i class="fas fa-music"></i></div><h4>Bonfire & Music</h4><p>Evening entertainment</p></div>
-        </div>
-    </div>
-</section>
-
-<!-- 5. PACKAGES (Safari) -->
-<section class="accommodations-section-safari section-with-decoration" id="packages">
-    <div class="section-fade-white-top"></div>
-    <div class="container">
-        <div class="safari-header reveal-on-scroll">
-            <p class="safari-subtitle">WILDLIFE WONDERS</p>
-            <h2 class="safari-title">Explore the Heart of the Wilderness with <span class="safari-title-accent">Classic Safari Adventures</span></h2>
-        </div>
-        <div class="safari-cards-grid">
-            <?php
-            $packages = new WP_Query(array(
-                'post_type' => 'package',
-                'posts_per_page' => 6,
-                'orderby' => 'date',
-                'order' => 'DESC'
-            ));
-            
-            if ($packages->have_posts()):
-                while ($packages->have_posts()): $packages->the_post();
-                    $duration = get_post_meta(get_the_ID(), '_package_duration', true);
-                    $price = get_post_meta(get_the_ID(), '_package_price', true);
-                    $old_price = get_post_meta(get_the_ID(), '_package_old_price', true);
-                    $discount = get_post_meta(get_the_ID(), '_package_discount', true);
-                    $badge = get_post_meta(get_the_ID(), '_package_badge', true);
-                    $zone = get_post_meta(get_the_ID(), '_package_zone', true);
-            ?>
-                <!-- Package Card -->
-                <div class="safari-card reveal-on-scroll">
-                    <div class="safari-card-image-wrapper">
-                        <?php if (has_post_thumbnail()): ?>
-                            <?php the_post_thumbnail('package-card', array('class' => 'safari-card-image', 'alt' => get_the_title())); ?>
-                        <?php else: ?>
-                            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800" alt="<?php the_title(); ?>" class="safari-card-image">
-                        <?php endif; ?>
-                        <?php if ($discount || $badge): ?>
-                        <div class="safari-card-badges">
-                            <?php if ($discount): ?>
-                                <span class="badge-discount"><?php echo esc_html($discount); ?></span>
-                            <?php endif; ?>
-                            <?php if ($badge): ?>
-                                <span class="badge-featured"><?php echo esc_html($badge); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <?php endif; ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px;">
+                <?php foreach($rooms as $r): ?>
+                <div style="background: #fdfdfd; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eee;">
+                    <div style="height: 250px; overflow: hidden;">
+                        <img src="<?php echo esc_url($r['img']); ?>" style="width: 100%; height: 100%; object-fit: cover; transition: 0.5s;">
                     </div>
-                    <div class="safari-card-content">
-                        <?php if ($zone): ?>
-                            <div class="safari-location"><i class="fas fa-map-marker-alt"></i> <?php echo esc_html($zone); ?></div>
-                        <?php endif; ?>
-                        <h3 class="safari-card-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-                        <div class="safari-pricing">
-                            <?php if ($duration): ?>
-                                <div class="safari-duration"><i class="far fa-calendar"></i> <?php echo esc_html($duration); ?></div>
-                            <?php endif; ?>
-                            <?php if ($price): ?>
-                                <div class="safari-price">
-                                    <?php if ($old_price): ?>
-                                        <span class="price-old">₹<?php echo esc_html($old_price); ?></span>
-                                    <?php endif; ?>
-                                    <span class="price-new">₹<?php echo esc_html($price); ?></span>
-                                </div>
-                            <?php endif; ?>
+                    <div style="padding: 25px;">
+                        <h3 style="font-size: 1.5rem; color: #084D2A; margin-bottom: 10px;"><?php echo esc_html($r['title']); ?></h3>
+                        <div style="font-size: 1.8rem; color: #E67D3C; font-weight: bold; margin-bottom: 20px;">
+                            <?php echo esc_html($r['price']); ?>
                         </div>
+                        <a href="<?php echo site_url('/contact'); ?>" style="display: block; width: 100%; padding: 12px; background: #084D2A; color: #fff; text-align: center; border-radius: 30px; text-decoration: none; font-weight: bold;">Book Now</a>
                     </div>
                 </div>
-            <?php 
-                endwhile;
-                wp_reset_postdata();
-            endif;
-            ?>
+                <?php endforeach; ?>
+            </div>
         </div>
-    </div>
-    <div class="section-fade-white-bottom"></div>
-</section>
+    </section>
+    <?php endif; ?>
 
-<?php
-endwhile;
-get_footer();
-?>
+    <section class="section" style="padding: 80px 0;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 60px; align-items: center;">
+                <div>
+                    <?php if($bottom_img): ?>
+                        <img src="<?php echo esc_url($bottom_img); ?>" style="width: 100%; border-radius: 20px; box-shadow: -20px 20px 0 rgba(8, 77, 42, 0.1);">
+                    <?php endif; ?>
+                </div>
+                <div>
+                    <span style="color: #E67D3C; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">About Us</span>
+                    <h2 style="font-size: 2.5rem; color: #084D2A; margin: 15px 0 25px;">
+                        <?php echo esc_html($bottom_title); ?>
+                    </h2>
+                    <p style="font-size: 1.1rem; line-height: 1.8; color: #555; margin-bottom: 25px;">
+                        <?php echo nl2br(esc_html($bottom_desc)); ?>
+                    </p>
+                    <a href="<?php echo site_url('/contact'); ?>" style="background: #E67D3C; color: #fff; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-block;">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<?php endwhile; ?>
+<?php get_footer(); ?>
