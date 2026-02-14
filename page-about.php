@@ -3,60 +3,6 @@
 get_header(); 
 ?>
 
-<style>
-    .reveal-on-scroll { opacity: 1 !important; transform: none !important; }
-    
-    /* Animation for Badge */
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    /* --- NEW ADJUSTMENTS --- */
-
-    /* 1. LAYOUT: Widen Text Column to extend sentence length */
-    .about-header-grid {
-        display: grid !important;
-        /* 1.4fr for text, 0.8fr for image -> Makes text area wider */
-        grid-template-columns: 1.0fr 1.0fr !important; 
-        gap: 5px !important; 
-        align-items: center !important;
-    }
-    
-    /* Ensure text fills the entire width of its new larger column */
-    .about-text-col {
-        width: 100% !important;
-        padding-right: 0 !important;
-    }
-
-    /* Force paragraphs to stretch fully */
-    .about-text-col p, 
-    .about-text-col .lead-paragraph,
-    .about-text-col .regular-content {
-        max-width: 100% !important;
-        width: 100% !important;
-    }
-
-    /* Mobile handling: Stack them on small screens */
-    @media (max-width: 991px) {
-        .about-header-grid {
-            grid-template-columns: 1fr !important;
-        }
-    }
-
-    /* 2. STATS SECTION: Smaller numbers & reduced padding */
-    .stat-num {
-        font-size: 2.5rem !important; /* Smaller text */
-        line-height: 1.2 !important;
-        margin-bottom: 0.5rem !important;
-    }
-
-    .stat-item {
-        padding: 1.5rem 1rem !important; /* Decreased padding inside the boxes */
-    }
-    
-    .stats-flex {
-        gap: 20px !important;
-    }
-</style>
-
 <?php while (have_posts()) : the_post(); 
     // Retrieve Data
     $intro_img = get_post_meta(get_the_ID(), '_about_intro_img', true);
@@ -65,15 +11,20 @@ get_header();
     $stats = maybe_unserialize(get_post_meta(get_the_ID(), '_about_stats', true)) ?: [];
     $features = maybe_unserialize(get_post_meta(get_the_ID(), '_about_features', true)) ?: [];
     $team = maybe_unserialize(get_post_meta(get_the_ID(), '_about_team', true)) ?: [];
+    $founder_name = get_post_meta(get_the_ID(), '_about_founder_name', true);
+    $founder_role = get_post_meta(get_the_ID(), '_about_founder_role', true);
+    $founder_img = get_post_meta(get_the_ID(), '_about_founder_img', true);
 ?>
 
 <section class="section about-intro">
     <div class="about-bg-pattern"></div>
     
     <div class="container">
+        <!-- FLEXBOX LAYOUT: 60% Text (Left) | 40% Image (Right) with 20px gap -->
         <div class="about-header-grid">
             
-            <div class="about-text-col">
+            <!-- LEFT COLUMN: TEXT CONTENT -->
+            <div class="about-text-section">
                 <span class="about-eyebrow">Who We Are</span>
                 <h1 class="about-main-title"><?php the_title(); ?></h1>
                 
@@ -97,12 +48,15 @@ get_header();
                 </div>
             </div>
 
-            <div class="about-img-col">
+            <!-- RIGHT COLUMN: IMAGE -->
+            <div class="about-image-section">
                 <div class="img-frame-decoration"></div>
                 <?php if($intro_img): ?>
                     <img src="<?php echo esc_url($intro_img); ?>" class="about-intro-img" alt="About WildTrek">
                 <?php else: ?>
-                    <div class="about-intro-placeholder">Add 'Intro Image' in Dashboard</div>
+                    <div class="about-intro-placeholder" style="height:550px; background:#eee; display:flex; align-items:center; justify-content:center; border-radius:180px 180px 20px 20px;">
+                        <p style="color:#666;">Add 'Intro Image' in Dashboard</p>
+                    </div>
                 <?php endif; ?>
 
                 <div class="about-badge-circle">
@@ -134,31 +88,24 @@ get_header();
                 <h2 class="section-title">Roam Through Our <br><span class="highlight">Safari Tales</span></h2>
                 <div class="story-content">
                     <p>Whether you're dreaming of witnessing a majestic lion or exploring the dense undergrowth, we bring you closer to nature.</p>
-                    <?php 
-    // 1. Get the saved data
-    $founder_name = get_post_meta(get_the_ID(), '_about_founder_name', true);
-    $founder_role = get_post_meta(get_the_ID(), '_about_founder_role', true);
-    $founder_img = get_post_meta(get_the_ID(), '_about_founder_img', true);
-?>
+                    
+                    <?php if($founder_name): ?>
+                    <div class="founder-box">
+                        <?php if($founder_img): ?>
+                            <img src="<?php echo esc_url($founder_img); ?>" class="founder-img" alt="<?php echo esc_attr($founder_name); ?>">
+                        <?php else: ?>
+                            <div style="width:60px; height:60px; background:#ddd; border-radius:50%;"></div>
+                        <?php endif; ?>
 
-<?php if($founder_name): ?>
-<div class="founder-box">
-    
-    <?php if($founder_img): ?>
-        <img src="<?php echo esc_url($founder_img); ?>" class="founder-img" alt="<?php echo esc_attr($founder_name); ?>">
-    <?php else: ?>
-        <div style="width:60px; height:60px; background:#ddd; border-radius:50%;"></div>
-    <?php endif; ?>
-
-    <div>
-        <strong><?php echo esc_html($founder_name); ?></strong>
-        <span><?php echo esc_html($founder_role); ?></span>
-    </div>
-    
-</div>
-<?php endif; ?>
+                        <div>
+                            <strong><?php echo esc_html($founder_name); ?></strong><br>
+                            <span><?php echo esc_html($founder_role); ?></span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
+            
             <div class="quote-box-wrap">
                 <i class="fas fa-quote-left quote-icon"></i>
                 <blockquote class="about-quote">

@@ -953,3 +953,4 @@ function tadoba_save_about($post_id) {
     if(isset($_POST['tadoba_team'])) update_post_meta($post_id, '_about_team', serialize(array_values($_POST['tadoba_team'])));
 }
 add_action('save_post', 'tadoba_save_about');
+
