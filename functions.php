@@ -255,8 +255,28 @@ function tadoba_save_meta($post_id) {
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
     if (!current_user_can('edit_post', $post_id)) return;
 
-    if (isset($_POST['package_price'])) update_post_meta($post_id, '_package_price', sanitize_text_field($_POST['package_price']));
-    if (isset($_POST['package_old_price'])) update_post_meta($post_id, '_package_old_price', sanitize_text_field($_POST['package_old_price']));
+    // Add these lines inside your save_post function block
+
+// 1. Save Indian Prices
+if (isset($_POST['indian_price_actual'])) {
+    update_post_meta($post_id, '_package_indian_price_actual', sanitize_text_field($_POST['indian_price_actual']));
+}
+if (isset($_POST['indian_price_offer'])) {
+    update_post_meta($post_id, '_package_indian_price_offer', sanitize_text_field($_POST['indian_price_offer']));
+}
+
+// 2. Save Global Prices
+if (isset($_POST['global_price_actual'])) {
+    update_post_meta($post_id, '_package_global_price_actual', sanitize_text_field($_POST['global_price_actual']));
+}
+if (isset($_POST['global_price_offer'])) {
+    update_post_meta($post_id, '_package_global_price_offer', sanitize_text_field($_POST['global_price_offer']));
+}
+
+// 3. Save the Checkbox
+// Checkboxes are tricky: if unchecked, nothing is sent in $_POST.
+$show_benefits_value = isset($_POST['show_booking_benefits']) && $_POST['show_booking_benefits'] === 'yes' ? 'yes' : 'no';
+update_post_meta($post_id, '_package_show_benefits', $show_benefits_value);
     if (isset($_POST['package_gallery'])) update_post_meta($post_id, '_package_gallery', sanitize_text_field($_POST['package_gallery']));
     if (isset($_POST['package_map'])) update_post_meta($post_id, '_package_map', sanitize_text_field($_POST['package_map']));
 
@@ -953,4 +973,3 @@ function tadoba_save_about($post_id) {
     if(isset($_POST['tadoba_team'])) update_post_meta($post_id, '_about_team', serialize(array_values($_POST['tadoba_team'])));
 }
 add_action('save_post', 'tadoba_save_about');
-
